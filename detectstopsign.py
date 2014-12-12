@@ -1,3 +1,8 @@
+#use usb camera connected to Rasbpery Pi to detect american stop sign
+#used mjpeg-streamer in Rasbery Pi
+#used cascade in this site http://www.cs.utah.edu/~turcsans/DUC/
+
+
 # coding: UTF-8
 import sys
 sys.path.append('/usr/local/lib/python2.7/site-packages')

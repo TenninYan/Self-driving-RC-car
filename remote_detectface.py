@@ -1,3 +1,6 @@
+#use usb camera connected to Rasbpery Pi to detect face
+#used mjpeg-streamer in Rasbery Pi
+
 # coding: UTF-8
 import sys
 sys.path.append('/usr/local/lib/python2.7/site-packages')
