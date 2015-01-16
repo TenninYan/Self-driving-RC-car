@@ -10,12 +10,9 @@ sys.path.append('/usr/local/lib/python2.7/site-packages')
 import numpy as np
 import cv2
 import urllib
+import socket
+import sys
 
-#HAAR分類器の顔検出用の特徴量
-#cascade_path = "/usr/local/opt/opencv/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml"
-#cascade_path = "/usr/local/opt/opencv/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml"
-#cascade_path = "/usr/local/opt/opencv/share/OpenCV/haarcascades/haarcascade_frontalface_alt2.xml"
-#cascade_path = "/usr/local/opt/opencv/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml"
 
 cascade_path = "cascade/haarcascade_stop.xml"
 
@@ -24,14 +21,20 @@ color = (255, 255, 255) #白
 #カスケード分類器の特徴量を取得する
 cascade = cv2.CascadeClassifier(cascade_path)
 
-#teny-Nexus7用
-#stream=urllib.urlopen('http://192.168.43.101:8080/?action=stream')
-#TP-LINK用
-# stream=urllib.urlopen('http://192.168.3.7:8080/?action=stream')
-#ist_members用
-# stream=urllib.urlopen('http://157.82.4.165:8080/?action=stream')
 stream=urllib.urlopen('http://tenypi.local:8080/?action=stream')
 bytes=''
+
+A=np.array([0,0,0,0,0])
+num = 0
+state = "go"
+
+TCP_IP = 'tenyPi.local'
+TCP_PORT = 5005
+BUFFER_SIZE = 1024
+# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# s.connect((TCP_IP, TCP_PORT))
+
+
 while True:
     bytes+=stream.read(1024)
     a = bytes.find('\xff\xd8')
@@ -51,12 +54,35 @@ while True:
         #parameter tuned
         facerect = cascade.detectMultiScale(image_gray, scaleFactor=1.1, minNeighbors=5, minSize=(20, 20), flags = cv2.cv.CV_HAAR_SCALE_IMAGE)
         if len(facerect) > 0:
+            # np.array[num%5]=1
+            A[num%5]=1
+            # print "stop_sign find"
             #検出した顔を囲む矩形の作成
             for rect in facerect:
                 cv2.rectangle(frame, tuple(rect[0:2]),tuple(rect[0:2]+rect[2:4]), color, thickness=2)
+        else:
+            # array[num%5]=0
+            A[num%5]=0
+
 
         # 画像を画面に出力する
         cv2.imshow('frame',frame)
+        num += 1
+
+        if np.sum(A)>4 and state=="go":
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((TCP_IP, TCP_PORT))
+            MESSAGE = "stop"
+            s.send(MESSAGE)
+            state="stop"
+            print "stop message send!!"
+        elif np.sum(A)<1 and state=="stop":
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((TCP_IP, TCP_PORT))
+            MESSAGE = "go"
+            s.send(MESSAGE)
+            state="go"
+            print "go message send!!"
 
     # "q"が押されたら抜ける
     if cv2.waitKey(1) & 0xFF == ord('q'):

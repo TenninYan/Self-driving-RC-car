@@ -1,15 +1,45 @@
-# coding: UTF-8
-
 #use usb camera connected to Rasbpery Pi to detect american stop sign
 #used mjpeg-streamer in Rasbery Pi
 #used cascade in this site http://www.cs.utah.edu/~turcsans/DUC/
 
+
+# coding: UTF-8
 import sys
 sys.path.append('/usr/local/lib/python2.7/site-packages')
  
 import numpy as np
 import cv2
 import urllib
+import time
+
+import commands
+
+check = os.system("ssh pi@tenyPi.local")
+
+if check==0:
+    print "unable to connect to tenyPi"
+    sys.exit()
+else:
+    print "connection succeed!"
+
+sleep(5)
+
+check = os.system("cd mjpeg-streamer")
+
+if check==0:
+    print "unable to go to mjpeg-streamer directory"
+    sys.exit()
+
+sleep(1)
+
+ check = os.system("./mjpeg-streamer ") 
+
+if check==0:
+    print "unable to start mjpeg-streamer"
+    sys.exit()
+else:
+    print "mjpeg-streamer started"
+
 
 #HAAR分類器の顔検出用の特徴量
 #cascade_path = "/usr/local/opt/opencv/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml"
@@ -27,10 +57,7 @@ cascade = cv2.CascadeClassifier(cascade_path)
 #teny-Nexus7用
 #stream=urllib.urlopen('http://192.168.43.101:8080/?action=stream')
 #TP-LINK用
-# stream=urllib.urlopen('http://192.168.3.7:8080/?action=stream')
-#ist_members用
-# stream=urllib.urlopen('http://157.82.4.165:8080/?action=stream')
-stream=urllib.urlopen('http://tenypi.local:8080/?action=stream')
+stream=urllib.urlopen('http://192.168.3.7:8080/?action=stream')
 bytes=''
 while True:
     bytes+=stream.read(1024)
@@ -47,7 +74,7 @@ while True:
         #物体認識（顔認識）の実行
         #facerect = cascade.detectMultiScale(image_gray, scaleFactor=1.1, minNeighbors=1, minSize=(1, 1))
         #facerect = cascade.detectMultiScale(image_gray, scaleFactor=1.1, minNeighbors=3, minSize=(10, 10), flags = cv2.cv.CV_HAAR_SCALE_IMAGE)
-
+        
         #parameter tuned
         facerect = cascade.detectMultiScale(image_gray, scaleFactor=1.1, minNeighbors=5, minSize=(20, 20), flags = cv2.cv.CV_HAAR_SCALE_IMAGE)
         if len(facerect) > 0:
