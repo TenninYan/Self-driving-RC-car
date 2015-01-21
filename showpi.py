@@ -7,7 +7,7 @@ import numpy as np
 import cv2
 import urllib
 
-stream=urllib.urlopen('http://192.168.3.20:8080/?action=stream')
+stream=urllib.urlopen('http://tenypi.local:8080/?action=stream')
 bytes=''
 while True:
     bytes+=stream.read(1024)
@@ -17,6 +17,8 @@ while True:
         jpg = bytes[a:b+2]
         bytes= bytes[b+2:]
         i = cv2.imdecode(np.fromstring(jpg, dtype=np.uint8),cv2.CV_LOAD_IMAGE_COLOR)
-        cv2.imshow('i',i)
-        if cv2.waitKey(1) == 27:
+        out = cv2.resize(i,(0,0),fx=4,fy=4)
+        cv2.imshow('result',out)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            # cv2.imwrite('line2.jpg',out)
             exit(0)

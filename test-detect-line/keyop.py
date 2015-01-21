@@ -1,18 +1,51 @@
-# coding: UTF-8
-
 #use usb camera connected to Rasbpery Pi to detect american stop sign
 #used mjpeg-streamer in Rasbery Pi
 #used cascade in this site http://www.cs.utah.edu/~turcsans/DUC/
 
+
+# coding: UTF-8
 import sys
 sys.path.append('/usr/local/lib/python2.7/site-packages')
  
 import numpy as np
 import cv2
 import urllib
-import socket
-import sys
+import time
 
+import commands
+
+check = os.system("ssh pi@tenyPi.local")
+
+if check==0:
+    print "unable to connect to tenyPi"
+    sys.exit()
+else:
+    print "connection succeed!"
+
+sleep(5)
+
+check = os.system("cd mjpeg-streamer")
+
+if check==0:
+    print "unable to go to mjpeg-streamer directory"
+    sys.exit()
+
+sleep(1)
+
+ check = os.system("./mjpeg-streamer ") 
+
+if check==0:
+    print "unable to start mjpeg-streamer"
+    sys.exit()
+else:
+    print "mjpeg-streamer started"
+
+
+#HAAR分類器の顔検出用の特徴量
+#cascade_path = "/usr/local/opt/opencv/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml"
+#cascade_path = "/usr/local/opt/opencv/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml"
+#cascade_path = "/usr/local/opt/opencv/share/OpenCV/haarcascades/haarcascade_frontalface_alt2.xml"
+#cascade_path = "/usr/local/opt/opencv/share/OpenCV/haarcascades/haarcascade_frontalface_alt_tree.xml"
 
 cascade_path = "cascade/haarcascade_stop.xml"
 
@@ -21,21 +54,11 @@ color = (255, 255, 255) #白
 #カスケード分類器の特徴量を取得する
 cascade = cv2.CascadeClassifier(cascade_path)
 
-stream=urllib.urlopen('http://tenypi.local:8080/?action=stream')
+#teny-Nexus7用
+#stream=urllib.urlopen('http://192.168.43.101:8080/?action=stream')
+#TP-LINK用
+stream=urllib.urlopen('http://192.168.3.7:8080/?action=stream')
 bytes=''
-
-# A=np.array([0,0,0,0,0])
-A=np.array([0,0,0])
-num = 0
-state = "stop"
-
-TCP_IP = 'tenyPi.local'
-TCP_PORT = 5005
-BUFFER_SIZE = 1024
-# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# s.connect((TCP_IP, TCP_PORT))
-
-
 while True:
     bytes+=stream.read(1024)
     a = bytes.find('\xff\xd8')
@@ -51,61 +74,22 @@ while True:
         #物体認識（顔認識）の実行
         #facerect = cascade.detectMultiScale(image_gray, scaleFactor=1.1, minNeighbors=1, minSize=(1, 1))
         #facerect = cascade.detectMultiScale(image_gray, scaleFactor=1.1, minNeighbors=3, minSize=(10, 10), flags = cv2.cv.CV_HAAR_SCALE_IMAGE)
-
+        
         #parameter tuned
         facerect = cascade.detectMultiScale(image_gray, scaleFactor=1.1, minNeighbors=5, minSize=(20, 20), flags = cv2.cv.CV_HAAR_SCALE_IMAGE)
         if len(facerect) > 0:
-            # np.array[num%5]=1
-            A[num%3]=1
-            # print "stop_sign find"
             #検出した顔を囲む矩形の作成
             for rect in facerect:
                 cv2.rectangle(frame, tuple(rect[0:2]),tuple(rect[0:2]+rect[2:4]), color, thickness=2)
-        else:
-            # array[num%5]=0
-            A[num%3]=0
-
 
         # 画像を画面に出力する
-        out = cv2.resize(frame,(0,0),fx=4,fy=4)
-        cv2.imshow('frame',out)
-        num += 1
-
-        if np.sum(A)>2 and state=="go":
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((TCP_IP, TCP_PORT))
-            MESSAGE = "stop"
-            s.send(MESSAGE)
-            state="stop"
-            print "stop message send!!"
-        elif np.sum(A)<1 and state=="stop":
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((TCP_IP, TCP_PORT))
-            MESSAGE = "go"
-            s.send(MESSAGE)
-            state="go"
-            print "go message send!!"
-
-    # if cv2.waitKey(1) & 0xFF == ord('g'):
-    #     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #     s.connect((TCP_IP, TCP_PORT))
-    #     MESSAGE = "go"
-    #     s.send(MESSAGE)
-    #     state="go"
-    #     print "go message send!!"
-    #     continue
+        cv2.imshow('frame',frame)
 
     # "q"が押されたら抜ける
     if cv2.waitKey(1) & 0xFF == ord('q'):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((TCP_IP, TCP_PORT))
-        MESSAGE = "exit"
-        s.send(MESSAGE)
-        state="exit"
-        print "exit message send!!"
         break
 
     # 後始末
-stream.release()
+cap.release()
 out.release()
 cv2.destroyAllWindows()
