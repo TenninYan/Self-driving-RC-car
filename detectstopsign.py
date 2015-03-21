@@ -49,11 +49,12 @@ while True:
         #facerect = cascade.detectMultiScale(image_gray, scaleFactor=1.1, minNeighbors=3, minSize=(10, 10), flags = cv2.cv.CV_HAAR_SCALE_IMAGE)
 
         #parameter tuned
-        facerect = cascade.detectMultiScale(image_gray, scaleFactor=1.1, minNeighbors=5, minSize=(20, 20), flags = cv2.cv.CV_HAAR_SCALE_IMAGE)
+        facerect = cascade.detectMultiScale(image_gray, scaleFactor=1.1, minNeighbors=5, minSize=(15, 15), flags = cv2.cv.CV_HAAR_SCALE_IMAGE)
         if len(facerect) > 0:
             #検出した顔を囲む矩形の作成
             for rect in facerect:
                 cv2.rectangle(frame, tuple(rect[0:2]),tuple(rect[0:2]+rect[2:4]), color, thickness=2)
+                print rect[2:3][0] , rect[3:4][0]
 
         # 画像を画面に出力する
         cv2.imshow('frame',frame)
