@@ -1,3 +1,6 @@
 old/
 movie/
 tcp-ip/
+test-detect-line/
+.DS_Store
+.python-version
