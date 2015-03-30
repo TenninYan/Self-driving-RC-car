@@ -1,6 +1,6 @@
 Self-driving-RC-car
 ===================
-![picture of car](./readme/pic1)
+![picture of car](./readme/pic1.jpg)
 
   this is what i made in my schools project.
   hack any radio-controlled medel car and put Raspberry Pi, camera,battery on it.
