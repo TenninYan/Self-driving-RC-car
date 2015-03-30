@@ -25,7 +25,7 @@ and it will be self-driving-car!!
 2. run detectstopsign.py in raspi (run as super user to control GPIO)
 3. run detectstopsign.py in MainPC
 
-![detect stop sign](./readme/pic2.jpg)
+![detect stop sign](./readme/pic2.png)
 
 
 # Detection of line
@@ -35,6 +35,6 @@ and it will be self-driving-car!!
 2. run detectline.py in raspi (run as super user to control GPIO)
 3. run detectline.py in MainPC
 
-![detect line](./readme/pic3.jpg)
+![detect line](./readme/pic3.png)
 
 
